@@ -33,26 +33,61 @@ extension Settings.PaneIdentifier {
 }
 ```
 
-Second, create a couple of view controllers for the settings panes you want. The only difference from implementing a normal view controller is that you have to add the `SettingsPane` protocol and implement the `paneIdentifier`, `toolbarItemTitle`, and `toolbarItemIcon` properties, as shown below. You can leave out `toolbarItemIcon` if you're using the `.segmentedControl` style.
+<<<<Second, create a couple of view controllers for the settings panes you want. The only difference from implementing a normal view controller is that you have to add the `SettingsPane` protocol and implement the `paneIdentifier`, `toolbarItemTitle`, and `toolbarItemIcon` properties, as shown below. You can leave out `toolbarItemIcon` if you're using the `.segmentedControl` style.
 
 `GeneralSettingsViewController.swift`
+>>>>>>>-main
+===
+<a h<a href="https://www.patreon.com/sindresorhus">
+    <img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" width="160">
+</a>
+
+
+## Usage
+
+*Run the `PreferencesExample` target in Xcode to try a live example.*
+
+First, create a collection of preference pane identifiers:
 
 ```swift
+import Preferences
+
+extension PreferencePaneIdentifier {
+    static let general = PreferencePaneIdentifier("general")
+    static let advanced = PreferencePaneIdentifier("advanced")
+}
+```
+
+Second, create a couple of view controllers for the preference panes you want. The only difference from implementing a normal view controller is that you have to add the `Preferenceable` protocol and implement the `toolbarItemTitle` and `toolbarItemIcon` getters, as shown below.
+
+`GeneralPreferenceViewController.swift`
+>>>>>>>-3b62df8
+swift
 import Cocoa
 import Settings
 
-final class GeneralSettingsViewController: NSViewController, SettingsPane {
+<<<<final class GeneralSettingsViewController: NSViewController, SettingsPane {
 	let paneIdentifier = Settings.PaneIdentifier.general
 	let paneTitle = "General"
 	let toolbarItemIcon = NSImage(systemSymbolName: "gearshape", accessibilityDescription: "General settings")!
 
 	override var nibName: NSNib.Name? { "GeneralSettingsViewController" }
+>>>>>>>-main
+===
+finafinal class GeneralPreferenceViewController: NSViewController, PreferencePane {
+    let preferencePaneIdentifier: PreferencePaneIdentifier = .general
+    let toolbarItemTitle = "General"
+    let toolbarItemIcon = NSImage(named: NSImage.preferencesGeneralName)!
 
-	override func viewDidLoad() {
-		super.viewDidLoad()
+    override var nibName: NSNib.Name? {
+        return "GeneralPreferenceViewController"
+    }
+>>>>>>>-3b62df8
+ override func viewDidLoad() {
+        super.viewDidLoad()
 
-		// Setup stuff here
-	}
+        // Setup stuff here
+    }
 }
 ```
 
@@ -64,18 +99,28 @@ Note: If you need to support macOS versions older than macOS 11, you have to add
 import Cocoa
 import Settings
 
-final class AdvancedSettingsViewController: NSViewController, SettingsPane {
+<<<<final class AdvancedSettingsViewController: NSViewController, SettingsPane {
 	let paneIdentifier = Settings.PaneIdentifier.advanced
 	let paneTitle = "Advanced"
 	let toolbarItemIcon = NSImage(systemSymbolName: "gearshape.2", accessibilityDescription: "Advanced settings")!
 
 	override var nibName: NSNib.Name? { "AdvancedSettingsViewController" }
+>>>>>>>+main
+===
+finafinal class AdvancedPreferenceViewController: NSViewController, PreferencePane {
+    let preferencePaneIdentifier: PreferencePaneIdentifier = .advanced
+    let toolbarItemTitle = "Advanced"
+    let toolbarItemIcon = NSImage(named: NSImage.advancedName)!
 
-	override func viewDidLoad() {
-		super.viewDidLoad()
+    override var nibName: NSNib.Name? {
+        return "AdvancedPreferenceViewController"
+    }
+>>>>>>>-3b62df8
+ override func viewDidLoad() {
+        super.viewDidLoad()
 
-		// Setup stuff here
-	}
+        // Setup stuff here
+    }
 }
 ```
 
@@ -102,18 +147,26 @@ import Settings
 
 @main
 final class AppDelegate: NSObject, NSApplicationDelegate {
-	@IBOutlet private var window: NSWindow!
+    @IBOutlet private var window: NSWindow!
 
-	private lazy var settingsWindowController = SettingsWindowController(
+<<<<<<	private lazy var settingsWindowController = SettingsWindowController(
 		panes: [
 			GeneralSettingsViewController(),
 			AdvancedSettingsViewController()
 		]
 	)
+>>>>>>>-main
+=
+    le    let preferencesWindowController = PreferencesWindowController(
+        preferences: [
+            GeneralPreferenceViewController(),
+            AdvancedPreferenceViewController()
+        ]
+    )
+>>>>>>>-3b62df8
+unc applicationDidFinishLaunching(_ notification: Notification) {}
 
-	func applicationDidFinishLaunching(_ notification: Notification) {}
-
-	@IBAction
+<<<<<<	@IBAction
 	func settingsMenuItemActionHandler(_ sender: NSMenuItem) {
 		settingsWindowController.show()
 	}
@@ -134,20 +187,253 @@ private lazy var settingsWindowController = SettingsWindowController(
 	style: .segmentedControl
 )
 // …
+>>>>>>>-main
+  @IBAct    @IBAction
+    func preferencesMenuItemActionHandler(_ sender: NSMenuItem) {
+        preferencesWindowController.showWindow()
+    }
+}
 ```
 
-`.toolbarItem` style:
+### Preferences Tab Styles
 
-![NSToolbarItem based (default)](toolbar-item.png)
+When you create the `PreferencesWindowController`, you can also switch between the `NSToolbarItem`-based style (default) and the `NSSegmentedControl`:
 
+```swift
+    // ...
+    let preferencesWindowController = PreferencesWindowController(
+        preferences: [
+            GeneralPreferenceViewController(),
+            AdvancedPreferenceViewController()
+        ],
+        style: .segmentedControl
+    )
+    // ...
+>>>>>>>-3b62df8
+lbarItem` style:
+
+
+Just pass in some view controllers and this package will take care of the rest. Built-in SwiftUI support.
+
+*This package is compatible with macOS 13 and automatically uses `Settings` instead of `Preferences` in the window title on macOS 13 and later.*
+
+*This project was previously known as `Preferences`.*
+
+## Requirements
+
+macOS 10.13 and later.
+
+## Install
+
+Add `https://github.com/sindresorhus/Settings` in the [“Swift Package Manager” tab in Xcode](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app).
+
+## Usage
+
+*Run the `Example` Xcode project to try a live example (requires macOS 11 or later).*
+
+First, create some settings pane identifiers:
+
+```swift
+import Settings
+
+extension Settings.PaneIdentifier {
+	static let general = Self("general")
+	static let advanced = Self("advanced")
+}
+```
+
+<<<<Second, create a couple of view controllers for the settings panes you want. The only difference from implementing a normal view controller is that you have to add the `SettingsPane` protocol and implement the `paneIdentifier`, `toolbarItemTitle`, and `toolbarItemIcon` properties, as shown below. You can leave out `toolbarItemIcon` if you're using the `.segmentedControl` style.
+
+`GeneralSettingsViewController.swift`
+>>>>>>>-main
+===
+<a h<a href="https://www.patreon.com/sindresorhus">
+    <img src="https://c5.patreon.com/external/logo/become_a_patron_button@2x.png" width="160">
+</a>
+
+
+## Usage
+
+*Run the `PreferencesExample` target in Xcode to try a live example.*
+
+First, create a collection of preference pane identifiers:
+
+```swift
+import Preferences
+
+extension PreferencePaneIdentifier {
+    static let general = PreferencePaneIdentifier("general")
+    static let advanced = PreferencePaneIdentifier("advanced")
+}
+```
+
+Second, create a couple of view controllers for the preference panes you want. The only difference from implementing a normal view controller is that you have to add the `Preferenceable` protocol and implement the `toolbarItemTitle` and `toolbarItemIcon` getters, as shown below.
+
+`GeneralPreferenceViewController.swift`
+>>>>>>>-3b62df8
+swift
+import Cocoa
+import Settings
+
+<<<<final class GeneralSettingsViewController: NSViewController, SettingsPane {
+	let paneIdentifier = Settings.PaneIdentifier.general
+	let paneTitle = "General"
+	let toolbarItemIcon = NSImage(systemSymbolName: "gearshape", accessibilityDescription: "General settings")!
+
+	override var nibName: NSNib.Name? { "GeneralSettingsViewController" }
+>>>>>>>-main
+===
+finafinal class GeneralPreferenceViewController: NSViewController, PreferencePane {
+    let preferencePaneIdentifier: PreferencePaneIdentifier = .general
+    let toolbarItemTitle = "General"
+    let toolbarItemIcon = NSImage(named: NSImage.preferencesGeneralName)!
+
+    override var nibName: NSNib.Name? {
+        return "GeneralPreferenceViewController"
+    }
+>>>>>>>-3b62df8
+ override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // Setup stuff here
+    }
+}
+```
+
+Note: If you need to support macOS versions older than macOS 11, you have to add a [fallback for the `toolbarItemIcon`](#backwards-compatibility).
+
+`AdvancedSettingsViewController.swift`
+
+```swift
+import Cocoa
+import Settings
+
+<<<<final class AdvancedSettingsViewController: NSViewController, SettingsPane {
+	let paneIdentifier = Settings.PaneIdentifier.advanced
+	let paneTitle = "Advanced"
+	let toolbarItemIcon = NSImage(systemSymbolName: "gearshape.2", accessibilityDescription: "Advanced settings")!
+
+	override var nibName: NSNib.Name? { "AdvancedSettingsViewController" }
+>>>>>>>+main
+===
+finafinal class AdvancedPreferenceViewController: NSViewController, PreferencePane {
+    let preferencePaneIdentifier: PreferencePaneIdentifier = .advanced
+    let toolbarItemTitle = "Advanced"
+    let toolbarItemIcon = NSImage(named: NSImage.advancedName)!
+
+    override var nibName: NSNib.Name? {
+        return "AdvancedPreferenceViewController"
+    }
+>>>>>>>-3b62df8
+ override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // Setup stuff here
+    }
+}
+```
+
+If you need to respond actions indirectly, the settings window controller will forward responder chain actions to the active pane if it responds to that selector.
+
+```swift
+final class AdvancedSettingsViewController: NSViewController, SettingsPane {
+	@IBOutlet private var fontLabel: NSTextField!
+	private var selectedFont = NSFont.systemFont(ofSize: 14)
+
+	@IBAction private func changeFont(_ sender: NSFontManager) {
+		font = sender.convert(font)
+	}
+}
+```
+
+In the `AppDelegate`, initialize a new `SettingsWindowController` and pass it the view controllers. Then add an action outlet for the `Settings…` menu item to show the settings window.
+
+`AppDelegate.swift`
+
+```swift
+import Cocoa
+import Settings
+
+@main
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    @IBOutlet private var window: NSWindow!
+
+<<<<<<	private lazy var settingsWindowController = SettingsWindowController(
+		panes: [
+			GeneralSettingsViewController(),
+			AdvancedSettingsViewController()
+		]
+	)
+>>>>>>>-main
+=
+    le    let preferencesWindowController = PreferencesWindowController(
+        preferences: [
+            GeneralPreferenceViewController(),
+            AdvancedPreferenceViewController()
+        ]
+    )
+>>>>>>>-3b62df8
+unc applicationDidFinishLaunching(_ notification: Notification) {}
+
+<<<<<<	@IBAction
+	func settingsMenuItemActionHandler(_ sender: NSMenuItem) {
+		settingsWindowController.show()
+	}
+}
+```
+
+### Settings Tab Styles
+
+When you create the `SettingsWindowController`, you can choose between the `NSToolbarItem`-based style (default) and the `NSSegmentedControl`:
+
+```swift
+// …
+private lazy var settingsWindowController = SettingsWindowController(
+	panes: [
+		GeneralSettingsViewController(),
+		AdvancedSettingsViewController()
+	],
+	style: .segmentedControl
+)
+// …
+>>>>>>>-main
+  @IBAct    @IBAction
+    func preferencesMenuItemActionHandler(_ sender: NSMenuItem) {
+        preferencesWindowController.showWindow()
+    }
+}
+```
+
+### Preferences Tab Styles
+
+When you create the `PreferencesWindowController`, you can also switch between the `NSToolbarItem`-based style (default) and the `NSSegmentedControl`:
+
+```swift
+    // ...
+    let preferencesWindowController = PreferencesWindowController(
+        preferences: [
+            GeneralPreferenceViewController(),
+            AdvancedPreferenceViewController()
+        ],
+        style: .segmentedControl
+    )
+    // ...
+>>>>>>>-3b62df8
+lbarItem` style:
+
+<<<<<<< ma
 `.segmentedControl` style:
 
 ![NSSegmentedControl based](segmented-control.png)
+>>>>>>>-main
+NSToolba![NSToolbarItem based (default)](images/toolbar-item.png)
 
-## API
+`.segmentedControl` style:
 
-```swift
-public enum Settings {}
+![NSSegmentedControl based](images/segmented-control.png)
+>>>>>>>-3b62df8
+``swift
+<<<<<<< mapublic enum Settings {}
 
 extension Settings {
 	public enum Style {
@@ -178,10 +464,28 @@ public final class SettingsWindowController: NSWindowController {
 	)
 
 	func show(pane: Settings.PaneIdentifier? = nil)
+>>>>>>>-main
+blic propublic protocol PreferencePane: AnyObject {
+    var preferencePaneIdentifier: PreferencePaneIdentifier { get }
+    var toolbarItemTitle: String { get }
+    // Defaults to an empty image
+    var toolbarItemIcon: NSImage { get }
+    var viewController: NSViewController { get }
 }
-```
 
-As with any `NSWindowController`, call `NSWindowController#close()` to close the settings window.
+public enum PreferencesStyle {
+    case toolbarItems
+    case segmentedControl
+}
+
+class PreferencesWindowController: NSWindowController {
+    init(preferencePanes: [PreferencePane], 
+         style: PreferencesStyle = .toolbarItems, 
+         animated: Bool = true)
+    func show(preferencePane: PreferencePaneIdentifier? = nil)
+    func hideWindow()
+>>>>>>>-3b62df8
+with any `NSWindowController`, call `NSWindowController#close()` to close the settings window.
 
 ## Recommendation
 
@@ -322,10 +626,9 @@ It can't be that hard right? Well, turns out it is:
 - Fully documented.
 - Adheres to the [macOS Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/patterns/settings/).
 - The window title is automatically localized by using the system string.
-
-## Related
-
-- [Defaults](https://github.com/sindresorhus/Defaults) - Swifty and modern UserDefaults
+<<<<<<< main
+>>>>>>>-ma![NSToolbarIt
+[Defaults](https://github.com/sindresorhus/Defaults) - Swifty and modern UserDefaults
 - [LaunchAtLogin](https://github.com/sindresorhus/LaunchAtLogin) - Add "Launch at Login" functionality to your macOS app
 - [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts) - Add user-customizable global keyboard shortcuts to your macOS app
 - [DockProgress](https://github.com/sindresorhus/DockProgress) - Show progress in your app's Dock icon

@@ -1,10 +1,6 @@
 import Cocoa
 import Settings
 
-final class AdvancedSettingsViewController: NSViewController, SettingsPane {
-	let paneIdentifier = Settings.PaneIdentifier.advanced
-	let paneTitle = "Advanced"
-	let toolbarItemIcon = NSImage(systemSymbolName: "gearshape.2", accessibilityDescription: "Advanced settings")!
 
 	@IBOutlet private var fontLabel: NSTextField!
 	private var font = NSFont.systemFont(ofSize: 14)
